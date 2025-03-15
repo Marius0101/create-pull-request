@@ -197,6 +197,7 @@ async function run() {
     else {
         core.info("No reviewers added to this pull request!");
     }
+    core.info("do somthing");
 }
 
 

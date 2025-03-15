@@ -21,5 +21,5 @@ export async function run(): Promise<void> {
     else {
         core.info("No reviewers added to this pull request!");
     }
-
+    core.info("do somthing");
 }
