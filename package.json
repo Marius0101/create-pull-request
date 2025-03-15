@@ -4,14 +4,15 @@
   "description": "Github Actions that create pull requests",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && ncc build lib/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "@vercel/ncc": "^0.38.3"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
