@@ -1,5 +1,8 @@
 import * as core from '@actions/core';
-export async function getInputs(): Promise<Inputs> {
+import * as github from '@actions/github';
+import {GitHub} from '@actions/github/lib/utils'
+
+async function getInputs(): Promise<Inputs> {
     
     const githubRepo = process.env.GITHUB_REPOSITORY;
     if (!githubRepo) {
@@ -23,3 +26,28 @@ export async function getInputs(): Promise<Inputs> {
     }
     return inputs  
 }
+async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitHub>): Promise<number> {
+    try{
+        const pull_request = await octokit.rest.pulls.create({
+            owner: inputs.owner,
+            repo: inputs.repo,
+            head: inputs.head,
+            base: inputs.base,
+            title: inputs.title,
+            body: inputs.body
+        })
+        core.info(`Pull request created successfully: ${pull_request.data.html_url}`);
+        return pull_request.data.number
+        
+        }
+        catch(error){
+            if (error instanceof Error) {
+                core.setFailed(`\nAction failed: ${error.message}`);
+            } 
+            else {
+                core.setFailed('Action failed: Unknown error');
+            }
+            return 0
+        }
+}
+export{ getInputs, createPullRequest}
