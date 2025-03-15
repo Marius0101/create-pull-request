@@ -75,7 +75,7 @@ async function addReviewersToPR(
     octokit: InstanceType<typeof GitHub>,
     pr_number: number): Promise<void>{
 
-    
+    try{
         if(inputs.user_reviewers){
             core.info(`Request the following user as reviewers: ${inputs.user_reviewers} `)
         }
@@ -89,16 +89,14 @@ async function addReviewersToPR(
             reviewers: inputs.user_reviewers,
             team_reviewers: inputs.team_reviewers
         })
-        core.info(`${response}`);
         core.info(`The reviewers were requested successfully.`);
-    
-    // catch(error){
-    //     if (error instanceof Error) {
-    //         core.setFailed(`\nAction failed: ${error.message}`);
-    //     } 
-    //     else {
-    //         core.setFailed('Action failed: Unknown error');
-    //     }
-    // }
+    }catch(error){
+        if (error instanceof Error) {
+            core.setFailed(`\nAction failed: ${error.message}`);
+        } 
+        else {
+            core.setFailed('Action failed: Unknown error');
+        }
+    }
 }
 export{ getInputs, createPullRequest, assigneUsersToPR, addReviewersToPR}
