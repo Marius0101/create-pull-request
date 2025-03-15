@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils'
 
 async function getInputs(): Promise<Inputs> {
@@ -26,10 +25,11 @@ async function getInputs(): Promise<Inputs> {
     }
     return inputs  
 }
+
 async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitHub>): Promise<number> {
     core.info("Creating the pull request")
     try{
-        const pull_request = await octokit.rest.pulls.create({
+        const response = await octokit.rest.pulls.create({
             owner: inputs.owner,
             repo: inputs.repo,
             head: inputs.head,
@@ -37,8 +37,8 @@ async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitH
             title: inputs.title,
             body: inputs.body
         })
-        core.info(`Pull request created successfully: ${pull_request.data.html_url}`);
-        return pull_request.data.number
+        core.info(`Pull request created successfully: ${response.data.html_url}`);
+        return response.data.number
         
         }
         catch(error){
@@ -51,4 +51,19 @@ async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitH
             return 0
         }
 }
-export{ getInputs, createPullRequest}
+async function assigneUsersToPR(
+    inputs: Inputs,
+    octokit: InstanceType<typeof GitHub>,
+    pr_number: number): Promise<void>{
+    
+    core.info(`Assign the following user to the PR: ${inputs.assignees} `)
+    const response = await octokit.rest.issues.addAssignees({
+        repo: inputs.repo,
+        owner: inputs.owner,
+        issue_number: pr_number,
+        assignees: inputs.assignees
+    })
+    core.info(`The users were assigned successfully.`);
+}
+
+export{ getInputs, createPullRequest, assigneUsersToPR}
