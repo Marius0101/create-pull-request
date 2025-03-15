@@ -1,6 +1,100 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 7503:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getInputs = getInputs;
+exports.createPullRequest = createPullRequest;
+const core = __importStar(__nccwpck_require__(7484));
+async function getInputs() {
+    const githubRepo = process.env.GITHUB_REPOSITORY;
+    if (!githubRepo) {
+        core.error("The variable GITHUB_REPOSITORY cannot be found.");
+        return {};
+    }
+    const [owner, repo] = githubRepo.split("/");
+    const inputs = {
+        repo: repo,
+        owner: owner,
+        ghToken: core.getInput("gh-token"),
+        title: core.getInput("title"),
+        head: core.getInput("head"),
+        base: core.getInput("base"),
+        body: core.getInput("body"),
+    };
+    const assignees = core.getInput("assignees");
+    if (assignees) {
+        const listAssignees = assignees.split(/\s+/).filter(user => user !== "");
+        ;
+        inputs.assignees = listAssignees;
+    }
+    return inputs;
+}
+async function createPullRequest(inputs, octokit) {
+    core.info("Creating the pull request");
+    try {
+        const pull_request = await octokit.rest.pulls.create({
+            owner: inputs.owner,
+            repo: inputs.repo,
+            head: inputs.head,
+            base: inputs.base,
+            title: inputs.title,
+            body: inputs.body
+        });
+        core.info(`Pull request created successfully: ${pull_request.data.html_url}`);
+        return pull_request.data.number;
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            core.setFailed(`\nAction failed: ${error.message}`);
+        }
+        else {
+            core.setFailed('Action failed: Unknown error');
+        }
+        return 0;
+    }
+}
+
+
+/***/ }),
+
 /***/ 5915:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -43,32 +137,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
+const common_1 = __nccwpck_require__(7503);
 async function run() {
-    const ghToken = core.getInput("gh-token");
-    const title = core.getInput("title");
-    const head = core.getInput("head");
-    const base = core.getInput("base");
-    const body = core.getInput("body");
-    const octokit = github.getOctokit(ghToken);
-    core.info("Creating the pull request");
-    try {
-        const pull_request = await octokit.rest.pulls.create({
-            owner: 'Marius0101',
-            repo: 'create-pull-request',
-            head: head,
-            base: base,
-            title: title,
-            body: body
-        });
-        core.info(`Pull request created successfully: ${pull_request.data.html_url}`);
+    const inputs = await (0, common_1.getInputs)();
+    const octokit = github.getOctokit(inputs.ghToken);
+    var pull_request_number;
+    const pr_number = await (0, common_1.createPullRequest)(inputs, octokit);
+    if (inputs) {
     }
-    catch (error) {
-        if (error instanceof Error) {
-            core.setFailed(`Action failed: ${error.message}`);
-        }
-        else {
-            core.setFailed('Action failed: Unknown error');
-        }
+    else {
+        core.info("No user was assinge.");
     }
 }
 
