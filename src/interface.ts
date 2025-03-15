@@ -7,4 +7,6 @@ interface Inputs{
     base:string
     body:string
     assignees?:string[]
+    user_reviewers?:string[]
+    team_reviewers?:string[]
 }
