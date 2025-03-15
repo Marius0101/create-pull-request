@@ -43,29 +43,35 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getInputs = getInputs;
 exports.createPullRequest = createPullRequest;
 exports.assigneUsersToPR = assigneUsersToPR;
+exports.addReviewersToPR = addReviewersToPR;
 const core = __importStar(__nccwpck_require__(7484));
+const github = __importStar(__nccwpck_require__(3228));
 async function getInputs() {
-    const githubRepo = process.env.GITHUB_REPOSITORY;
-    if (!githubRepo) {
-        core.error("The variable GITHUB_REPOSITORY cannot be found.");
-        return {};
-    }
-    const [owner, repo] = githubRepo.split("/");
+    const getInputList = (inputName) => {
+        const input = core.getInput(inputName);
+        if (input) {
+            return input.split(/\s+/).filter(user => user !== "");
+        }
+        return undefined;
+    };
     const inputs = {
-        repo: repo,
-        owner: owner,
+        repo: github.context.repo.repo,
+        owner: github.context.repo.owner,
         ghToken: core.getInput("gh-token"),
         title: core.getInput("title"),
         head: core.getInput("head"),
         base: core.getInput("base"),
         body: core.getInput("body"),
+        assignees: getInputList("assignees"),
+        user_reviewers: getInputList("user_reviewers"),
+        team_reviewers: getInputList("team_reviewers")
     };
-    const assignees = core.getInput("assignees");
-    if (assignees) {
-        const listAssignees = assignees.split(/\s+/).filter(user => user !== "");
-        ;
-        inputs.assignees = listAssignees;
-    }
+    if (!inputs.assignees?.length)
+        delete inputs.assignees;
+    if (!inputs.user_reviewers?.length)
+        delete inputs.user_reviewers;
+    if (!inputs.team_reviewers?.length)
+        delete inputs.team_reviewers;
     return inputs;
 }
 async function createPullRequest(inputs, octokit) {
@@ -94,15 +100,39 @@ async function createPullRequest(inputs, octokit) {
 }
 async function assigneUsersToPR(inputs, octokit, pr_number) {
     core.info(`Assign the following user to the PR: ${inputs.assignees} `);
-    const response = await octokit.rest.issues.addAssignees({
+    await octokit.rest.issues.addAssignees({
         repo: inputs.repo,
         owner: inputs.owner,
         issue_number: pr_number,
         assignees: inputs.assignees
     });
-    core.info(`stats:${response.status}`);
-    if (response.headers.status)
-        core.info(`The users were assigned successfully.`);
+    core.info(`The users were assigned successfully.`);
+}
+async function addReviewersToPR(inputs, octokit, pr_number) {
+    try {
+        if (inputs.user_reviewers) {
+            core.info(`Request the following user as reviewers: ${inputs.user_reviewers} `);
+        }
+        if (inputs.team_reviewers) {
+            core.info(`Request the following teams as reviewers: ${inputs.team_reviewers} `);
+        }
+        const response = await octokit.rest.pulls.requestReviewers({
+            repo: inputs.repo,
+            owner: inputs.owner,
+            pull_number: pr_number,
+            reviewers: inputs.user_reviewers,
+            team_reviewers: inputs.team_reviewers
+        });
+        core.info(`The reviewers were requested successfully.`);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            core.setFailed(`\nAction failed: ${error.message}`);
+        }
+        else {
+            core.setFailed('Action failed: Unknown error');
+        }
+    }
 }
 
 
@@ -160,6 +190,12 @@ async function run() {
     }
     else {
         core.info("No users assigned to this pull request!");
+    }
+    if (inputs.team_reviewers || inputs.user_reviewers) {
+        await (0, common_1.addReviewersToPR)(inputs, octokit, pr_number);
+    }
+    else {
+        core.info("No reviewers added to this pull request!");
     }
 }
 
