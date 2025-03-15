@@ -2,6 +2,11 @@ name: "Create pull request"
 description: "Create pull request"
 author: "Marius Mihalcea"
 
+inputs:
+  gh-token:
+    description: "The github token with permisions"
+    required: true
+    
 runs: 
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"
