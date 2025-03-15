@@ -1,19 +1,18 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { getInputs, createPullRequest } from './common';
+import { getInputs, createPullRequest, assigneUsersToPR } from './common';
 
 export async function run(): Promise<void> {
     
     const inputs = await getInputs();
     const octokit = github.getOctokit(inputs.ghToken);
 
-    var pull_request_number:number;
-    
-    const pr_number:number = await createPullRequest(inputs, octokit)
-    if(inputs){
-        
+    const pr_number:number = await createPullRequest(inputs, octokit);
+
+    if(inputs.assignees){
+        await assigneUsersToPR(inputs,octokit,pr_number); 
     }
     else{
-        core.info("No user was assinge.")
+        core.info("No users assigned to this pull request!");
     }
 }

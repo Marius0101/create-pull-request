@@ -42,6 +42,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getInputs = getInputs;
 exports.createPullRequest = createPullRequest;
+exports.assigneUsersToPR = assigneUsersToPR;
 const core = __importStar(__nccwpck_require__(7484));
 async function getInputs() {
     const githubRepo = process.env.GITHUB_REPOSITORY;
@@ -70,7 +71,7 @@ async function getInputs() {
 async function createPullRequest(inputs, octokit) {
     core.info("Creating the pull request");
     try {
-        const pull_request = await octokit.rest.pulls.create({
+        const response = await octokit.rest.pulls.create({
             owner: inputs.owner,
             repo: inputs.repo,
             head: inputs.head,
@@ -78,8 +79,8 @@ async function createPullRequest(inputs, octokit) {
             title: inputs.title,
             body: inputs.body
         });
-        core.info(`Pull request created successfully: ${pull_request.data.html_url}`);
-        return pull_request.data.number;
+        core.info(`Pull request created successfully: ${response.data.html_url}`);
+        return response.data.number;
     }
     catch (error) {
         if (error instanceof Error) {
@@ -90,6 +91,18 @@ async function createPullRequest(inputs, octokit) {
         }
         return 0;
     }
+}
+async function assigneUsersToPR(inputs, octokit, pr_number) {
+    core.info(`Assign the following user to the PR: ${inputs.assignees} `);
+    const response = await octokit.rest.issues.addAssignees({
+        repo: inputs.repo,
+        owner: inputs.owner,
+        issue_number: pr_number,
+        assignees: inputs.assignees
+    });
+    core.info(`stats:${response.status}`);
+    if (response.headers.status)
+        core.info(`The users were assigned successfully.`);
 }
 
 
@@ -141,12 +154,12 @@ const common_1 = __nccwpck_require__(7503);
 async function run() {
     const inputs = await (0, common_1.getInputs)();
     const octokit = github.getOctokit(inputs.ghToken);
-    var pull_request_number;
     const pr_number = await (0, common_1.createPullRequest)(inputs, octokit);
-    if (inputs) {
+    if (inputs.assignees) {
+        await (0, common_1.assigneUsersToPR)(inputs, octokit, pr_number);
     }
     else {
-        core.info("No user was assinge.");
+        core.info("No users assigned to this pull request!");
     }
 }
 
