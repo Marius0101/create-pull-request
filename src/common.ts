@@ -27,6 +27,7 @@ async function getInputs(): Promise<Inputs> {
     return inputs  
 }
 async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitHub>): Promise<number> {
+    core.info("Creating the pull request")
     try{
         const pull_request = await octokit.rest.pulls.create({
             owner: inputs.owner,

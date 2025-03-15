@@ -8,7 +8,7 @@ export async function run(): Promise<void> {
     const octokit = github.getOctokit(inputs.ghToken);
 
     var pull_request_number:number;
-    core.info("Creating the pull request")
+    
     const pr_number:number = await createPullRequest(inputs, octokit)
     if(inputs){
         
