@@ -50,15 +50,26 @@ async function run() {
     const base = core.getInput("base");
     const body = core.getInput("body");
     const octokit = github.getOctokit(ghToken);
-    const pull_request = await octokit.rest.pulls.create({
-        owner: 'Marius0101',
-        repo: 'create-pull-request',
-        head: head,
-        base: base,
-        title: title,
-        body: body
-    });
-    console.log(pull_request);
+    core.info("Creating the pull request");
+    try {
+        const pull_request = await octokit.rest.pulls.create({
+            owner: 'Marius0101',
+            repo: 'create-pull-request',
+            head: head,
+            base: base,
+            title: title,
+            body: body
+        });
+        core.info(`Pull request created successfully: ${pull_request.data.html_url}`);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            core.setFailed(`Action failed: ${error.message}`);
+        }
+        else {
+            core.setFailed('Action failed: Unknown error');
+        }
+    }
 }
 
 
