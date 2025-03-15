@@ -1,0 +1,7 @@
+name: "Create pull request"
+description: "Create pull request"
+author: "Marius Mihalcea"
+
+runs: 
+  using: "node16"
+  main: "dist/index.js"
