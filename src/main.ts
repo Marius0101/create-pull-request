@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { getInputs, createPullRequest, assigneUsersToPR } from './common';
+import { getInputs, createPullRequest, assigneUsersToPR, addReviewersToPR } from './common';
 
 export async function run(): Promise<void> {
     
@@ -15,4 +15,11 @@ export async function run(): Promise<void> {
     else{
         core.info("No users assigned to this pull request!");
     }
+    if(inputs.team_reviewers || inputs.user_reviewers){
+        await addReviewersToPR(inputs,octokit,pr_number)
+    }
+    else {
+        core.info("No reviewers added to this pull request!");
+    }
+
 }
