@@ -20,7 +20,15 @@ inputs:
     required: false
     default: ""
   assignees:
-    description: "Adds up to 10 assignees to an issue."
+    description: "Adds up to 10 assignees to a pull request."
+    required: false
+    default: ""
+  user_reviewers:
+    description: "A list with users that will be requested for review."
+    required: false
+    default: ""
+  team_reviewers:
+    description: "A list with teams that will be requested for review."
     required: false
     default: ""
 runs: 
