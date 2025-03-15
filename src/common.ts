@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import {GitHub} from '@actions/github/lib/utils'
-
+import * as github from '@actions/github'
 async function getInputs(): Promise<Inputs> {
     
     const githubRepo = process.env.GITHUB_REPOSITORY;
@@ -10,8 +10,8 @@ async function getInputs(): Promise<Inputs> {
     }
     const [owner, repo] = githubRepo.split("/");
     const inputs:Inputs = {
-        repo:       repo,
-        owner:      owner,
+    repo:           github.context.repo.repo,
+        owner:      github.context.repo.owner,
         ghToken:    core.getInput("gh-token"),
         title:      core.getInput("title"),
         head:       core.getInput("head"),
