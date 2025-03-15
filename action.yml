@@ -4,9 +4,21 @@ author: "Marius Mihalcea"
 
 inputs:
   gh-token:
-    description: "The github token with permisions"
+    description: "The github token with permisions."
     required: true
-    
+  title: 
+    description: "The pull request title."
+    required: true
+  head:
+    description: "The name of the branch where your changes are implemented."
+    required: true
+  base:
+    description: "The name of the branch you want the changes pulled into."  
+    required: true
+  body:
+    description: "The contents of the pull request."
+    required: false
+    default: ""
 runs: 
-  using: "node20"
-  main: "dist/index.js"
+  using: node20
+  main: dist/index.js

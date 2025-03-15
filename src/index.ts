@@ -1,4 +1,3 @@
-import { getInput } from "@actions/core";
+import { run } from "./main";
 
-const ghToken:string = getInput("name");
-console.log("Token ghToken!");
+run();
