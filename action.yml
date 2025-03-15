@@ -19,6 +19,10 @@ inputs:
     description: "The contents of the pull request."
     required: false
     default: ""
+  assignees:
+    description: "Adds up to 10 assignees to an issue."
+    required: false
+    default: ""
 runs: 
   using: node20
   main: dist/index.js
