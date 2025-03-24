@@ -1,7 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 7503:
+/***/ 4308:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -40,13 +40,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputs = getInputs;
-exports.createPullRequest = createPullRequest;
-exports.assigneUsersToPR = assigneUsersToPR;
-exports.addReviewersToPR = addReviewersToPR;
+exports.addReviewersToPR = exports.assigneUsersToPR = exports.createPullRequest = exports.getInputs = void 0;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
-async function getInputs() {
+const getInputs = async () => {
     const getInputList = (inputName) => {
         const input = core.getInput(inputName);
         if (input) {
@@ -73,8 +70,9 @@ async function getInputs() {
     if (!inputs.team_reviewers?.length)
         delete inputs.team_reviewers;
     return inputs;
-}
-async function createPullRequest(inputs, octokit) {
+};
+exports.getInputs = getInputs;
+const createPullRequest = async (inputs, octokit) => {
     core.info("Creating the pull request");
     try {
         const response = await octokit.rest.pulls.create({
@@ -97,8 +95,9 @@ async function createPullRequest(inputs, octokit) {
         }
         return 0;
     }
-}
-async function assigneUsersToPR(inputs, octokit, pr_number) {
+};
+exports.createPullRequest = createPullRequest;
+const assigneUsersToPR = async (inputs, octokit, pr_number) => {
     core.info(`Assign the following user to the PR: ${inputs.assignees} `);
     await octokit.rest.issues.addAssignees({
         repo: inputs.repo,
@@ -107,8 +106,9 @@ async function assigneUsersToPR(inputs, octokit, pr_number) {
         assignees: inputs.assignees
     });
     core.info(`The users were assigned successfully.`);
-}
-async function addReviewersToPR(inputs, octokit, pr_number) {
+};
+exports.assigneUsersToPR = assigneUsersToPR;
+const addReviewersToPR = async (inputs, octokit, pr_number) => {
     try {
         if (inputs.user_reviewers) {
             core.info(`Request the following user as reviewers: ${inputs.user_reviewers} `);
@@ -133,12 +133,13 @@ async function addReviewersToPR(inputs, octokit, pr_number) {
             core.setFailed('Action failed: Unknown error');
         }
     }
-}
+};
+exports.addReviewersToPR = addReviewersToPR;
 
 
 /***/ }),
 
-/***/ 5915:
+/***/ 9396:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -180,7 +181,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
-const common_1 = __nccwpck_require__(7503);
+const common_1 = __nccwpck_require__(4308);
 async function run() {
     const inputs = await (0, common_1.getInputs)();
     const octokit = github.getOctokit(inputs.ghToken);
@@ -32034,7 +32035,7 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const main_1 = __nccwpck_require__(5915);
+const main_1 = __nccwpck_require__(9396);
 (0, main_1.run)();
 
 })();
