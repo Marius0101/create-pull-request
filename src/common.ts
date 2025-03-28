@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import {GitHub} from '@actions/github/lib/utils'
 import * as github from '@actions/github'
+import { RequestError } from '@octokit/request-error';
 
 const getInputs =  async (): Promise<Inputs> => {
     const getInputList = (inputName: string): string[] | undefined => {
@@ -48,12 +49,12 @@ const createPullRequest = async (inputs:Inputs, octokit:InstanceType<typeof GitH
         }
     catch(error){
         if (error instanceof Error) {
-            core.setFailed(`\nAction failed: ${error.message}`);
+            handleRequestError(error);
         } 
         else {
-            core.setFailed('Action failed: Unknown error');
+            core.setFailed('Error creating pull request: Unknown error');
         }
-        return 0
+        process.exit(1);
     }
 }
 const assigneUsersToPR = async (
@@ -99,4 +100,24 @@ const addReviewersToPR = async(
         }
     }
 }
+
+const handleRequestError = (error: Error): void => {
+    const requestErr = error as RequestError;
+    const data: ErrorDataResponse | undefined = requestErr.response?.data as ErrorDataResponse;
+    
+    let errorMsg = "Error creating pull request: ";
+    if (data) {
+        errorMsg += `${data.message}\n`;
+        errorMsg += `Status Code: ${data.status}\n`;
+        
+        if (data.errors?.length) {
+            errorMsg += "Details: " + data.errors.map(e => e.message).join("\n") + "\n";
+        }
+        
+        errorMsg += `GitHub endpoint documentation: ${data.documentation_url}\n`;
+    } else {
+        errorMsg += "No response data available.";
+    }
+    core.setFailed(errorMsg);
+};
 export { getInputs, createPullRequest, assigneUsersToPR, addReviewersToPR}
