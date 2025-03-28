@@ -1,10 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { getInputs } from '../src/common';
-
-
-
-describe('GetInputs tests',  () => {
+import { createPullRequest, getInputs } from '../src/common';
+import { GitHub } from '@actions/github/lib/utils';
+import { RequestError } from '@octokit/request-error';
+describe('getInputs tests',  () => {
     let inputs = {} as any
     beforeAll(() => {
 
@@ -25,7 +24,6 @@ describe('GetInputs tests',  () => {
     afterAll(() => {
         jest.restoreAllMocks()
     });
-    
     it('Should return corect inputs when all inputs are provided', async () =>{
         
         //Arrange
@@ -120,3 +118,94 @@ describe('GetInputs tests',  () => {
         expect(sut).toEqual(expectedInputs);
     });
 });
+
+describe('createPullRequest',  () => {
+    const mockOctokit = {
+        rest: {
+          pulls: {
+            create: jest.fn(),
+          },
+        },
+    };
+    const inputs:Inputs = {
+        repo:   'testRepo',
+        owner:  'testOwner',
+        ghToken:'testToken',
+        title:  'testTitle',
+        head:   'testHead',
+        base:   'testBase',
+        body:   'testBody'
+    };
+    
+    beforeAll(()=>{
+        jest.spyOn(core, "info");
+        jest.spyOn(core, "setFailed");
+        jest.spyOn(process, 'exit').mockImplementation();
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+    it("Should return PR number on succes", async () =>{
+        mockOctokit.rest.pulls.create.mockResolvedValue({
+            data: { number: 11, html_url: "https://github.com/test/pr/42" },
+        })
+
+        const sut = await createPullRequest(inputs, mockOctokit as unknown as InstanceType<typeof GitHub>);
+
+        expect(sut).toBe(11);
+        expect(core.info).toHaveBeenCalledWith("Creating the pull request");
+        expect(core.info).toHaveBeenCalledWith("Pull request created successfully: https://github.com/test/pr/42");
+    });
+
+    it("Should handle know error", async () =>{
+        let data:ErrorDataResponse = {
+            message:'Validation Failed',
+            status: '422',
+            documentation_url: 'https://docs.github.com/rest/pulls/pulls#create-a-pull-request',
+            errors: [
+                {
+                    message: 'A pull request already exists for Marius0101:feature/add-unit-tests',
+                    resource: 'test',
+                    code: 'test'
+                }]
+        };
+        let requestErr:RequestError = {
+            message: '',
+            name:'HttpError',
+            status: 422,
+            request: {
+                method:'GET',
+                url:'',
+                headers:{}
+            },
+            response: {
+                data:data,
+                status: 422,
+                headers: {},
+                url:''
+            }
+        }
+        const error = new Error('Request failed') as any;
+        error.response = requestErr.response;
+        mockOctokit.rest.pulls.create.mockRejectedValue(error);
+        await createPullRequest(inputs, mockOctokit as unknown as InstanceType<typeof GitHub>);
+
+        expect(core.setFailed).toHaveBeenCalledWith(
+            'Error creating pull request: Validation Failed\n'+
+            'Status Code: 422\n'+
+            'Details: A pull request already exists for Marius0101:feature/add-unit-tests\n'+
+            'GitHub endpoint documentation: https://docs.github.com/rest/pulls/pulls#create-a-pull-request\n'
+        );
+        expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("Should handle unknow error", async () =>{
+        mockOctokit.rest.pulls.create.mockRejectedValue('Unknown error');
+        
+        await createPullRequest(inputs, mockOctokit as unknown as InstanceType<typeof GitHub>);
+
+        expect(core.setFailed).toHaveBeenCalledWith('Error creating pull request: Unknown error');
+        expect(process.exit).toHaveBeenCalledWith(1);
+    });
+})
