@@ -1,8 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { createPullRequest, getInputs } from '../src/common';
+import { addReviewersToPR, assigneUsersToPR, createPullRequest, getInputs } from '../src/common';
 import { GitHub } from '@actions/github/lib/utils';
 import { RequestError } from '@octokit/request-error';
+
 describe('getInputs tests',  () => {
     let inputs = {} as any
     beforeAll(() => {
@@ -119,7 +120,7 @@ describe('getInputs tests',  () => {
     });
 });
 
-describe('createPullRequest',  () => {
+describe('createPullRequest tests',  () => {
     const mockOctokit = {
         rest: {
           pulls: {
@@ -147,18 +148,22 @@ describe('createPullRequest',  () => {
         jest.clearAllMocks();
     });
     it("Should return PR number on succes", async () =>{
+        //Arrange
         mockOctokit.rest.pulls.create.mockResolvedValue({
             data: { number: 11, html_url: "https://github.com/test/pr/42" },
         })
 
+        //Act
         const sut = await createPullRequest(inputs, mockOctokit as unknown as InstanceType<typeof GitHub>);
 
+        //Assert
         expect(sut).toBe(11);
         expect(core.info).toHaveBeenCalledWith("Creating the pull request");
         expect(core.info).toHaveBeenCalledWith("Pull request created successfully: https://github.com/test/pr/42");
     });
 
     it("Should handle know error", async () =>{
+        //Arrange
         let data:ErrorDataResponse = {
             message:'Validation Failed',
             status: '422',
@@ -189,8 +194,11 @@ describe('createPullRequest',  () => {
         const error = new Error('Request failed') as any;
         error.response = requestErr.response;
         mockOctokit.rest.pulls.create.mockRejectedValue(error);
+
+        //Act
         await createPullRequest(inputs, mockOctokit as unknown as InstanceType<typeof GitHub>);
 
+        //Assert
         expect(core.setFailed).toHaveBeenCalledWith(
             'Error creating pull request: Validation Failed\n'+
             'Status Code: 422\n'+
@@ -201,11 +209,160 @@ describe('createPullRequest',  () => {
     });
 
     it("Should handle unknow error", async () =>{
+        //Arrange
         mockOctokit.rest.pulls.create.mockRejectedValue('Unknown error');
         
+        //Act
         await createPullRequest(inputs, mockOctokit as unknown as InstanceType<typeof GitHub>);
 
+        //Assert
         expect(core.setFailed).toHaveBeenCalledWith('Error creating pull request: Unknown error');
         expect(process.exit).toHaveBeenCalledWith(1);
     });
-})
+});
+
+describe('assigneUsersToPR tests ' ,() => {
+
+    const inputs:Inputs = {
+        repo:   'testRepo',
+        owner:  'testOwner',
+        ghToken:'testToken',
+        title:  'testTitle',
+        head:   'testHead',
+        base:   'testBase',
+        body:   'testBody',
+        assignees: ["user1", "user2"]
+    };
+    const pr_number = 123;
+    let mockOctokit = {
+        rest: {
+        issues: {
+            addAssignees: jest.fn()
+          },
+        },
+    };
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    it("Should call addAssignees with correct parameters", async ()=>{
+        //Arrange 
+        let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>
+        
+        //Act
+        await assigneUsersToPR(inputs,octokit, pr_number);  
+
+        //Assert
+        expect(octokit.rest.issues.addAssignees).toHaveBeenCalledWith({
+            repo: "testRepo",
+            owner: "testOwner",
+            issue_number: pr_number,
+            assignees: ["user1", "user2"],
+          });
+    })
+    it("Shoul log appropiate messages", async ()=>{
+        //Arrange 
+        jest.spyOn(core, "info");
+        const pr_number = 123;
+        
+
+        //Act
+        await assigneUsersToPR(inputs,mockOctokit as unknown as InstanceType<typeof GitHub>, pr_number);  
+
+        //Assert
+        expect(core.info).toHaveBeenCalledWith(
+            "Assign the following user to the PR: user1,user2 "
+          );
+        expect(core.info).toHaveBeenCalledWith(
+            "The users were assigned successfully."
+          );
+    })
+    
+    
+
+});
+
+describe ( 'addReviewersToPR tests', ()=>{
+    const mockOctokit = {
+        rest: {
+          pulls: {
+            requestReviewers: jest.fn(),
+          },
+        },
+    };
+    let coreinfoMock: jest.SpyInstance<void, [message: string], any>;
+    let inputs:Inputs = {
+        repo:   'testRepo',
+        owner:  'testOwner',
+        ghToken:'testToken',
+        title:  'testTitle',
+        head:   'testHead',
+        base:   'testBase',
+        body:   'testBody',
+    };
+    const pr_number = 123;
+    beforeEach(()=>{
+        coreinfoMock= jest.spyOn(core, "info");
+    });
+    afterEach(() =>{
+        coreinfoMock.mockClear();
+        inputs.team_reviewers = undefined
+        inputs.user_reviewers = undefined
+    });
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    it("Should request reviewers with success", async () => {
+        //Arrange
+        inputs.user_reviewers =["user1", "user2"] 
+        inputs.team_reviewers = ["team1", "team2"]
+        let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>
+        
+        await addReviewersToPR(inputs,octokit, pr_number);
+        expect(octokit.rest.pulls.requestReviewers).toHaveBeenCalledWith({
+            repo: inputs.repo,
+            owner: inputs.owner,
+            pull_number: pr_number,
+            reviewers: inputs.user_reviewers,
+            team_reviewers: inputs.team_reviewers,
+          });  
+        expect(core.info).toHaveBeenNthCalledWith(1,`Request the following user as reviewers: ${inputs.user_reviewers}`);
+        expect(core.info).toHaveBeenNthCalledWith(2,`Request the following teams as reviewers: ${inputs.team_reviewers}`);
+        expect(core.info).toHaveBeenNthCalledWith(3,`The reviewers were requested successfully.`);
+        
+    });
+
+    it("Should request user reviewers with success", async () => {
+        //Arrange
+        inputs.user_reviewers =["user1", "user2"] 
+        let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>
+        
+        await addReviewersToPR(inputs,octokit, pr_number);
+        expect(octokit.rest.pulls.requestReviewers).toHaveBeenCalledWith({
+            repo: inputs.repo,
+            owner: inputs.owner,
+            pull_number: pr_number,
+            reviewers: inputs.user_reviewers,
+            team_reviewers: inputs.team_reviewers
+          });  
+        expect(core.info).toHaveBeenNthCalledWith(1,`Request the following user as reviewers: ${inputs.user_reviewers}`);
+        expect(core.info).toHaveBeenNthCalledWith(2,`The reviewers were requested successfully.`);
+        
+    });
+    it("Should request team reviewers with success", async () => {
+        //Arrange
+        inputs.team_reviewers =["team1", "team2"];
+        let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>
+        
+        await addReviewersToPR(inputs,octokit, pr_number);
+        expect(octokit.rest.pulls.requestReviewers).toHaveBeenCalledWith({
+            repo: inputs.repo,
+            owner: inputs.owner,
+            pull_number: pr_number,
+            reviewers: inputs.user_reviewers,
+            team_reviewers: inputs.team_reviewers
+          });  
+        expect(core.info).toHaveBeenNthCalledWith(1,`Request the following teams as reviewers: ${inputs.team_reviewers}`);
+        expect(core.info).toHaveBeenNthCalledWith(2,`The reviewers were requested successfully.`);
+    });
+});

@@ -88,7 +88,8 @@ const createPullRequest = async (inputs, octokit) => {
     }
     catch (error) {
         if (error instanceof Error) {
-            handleRequestError(error);
+            const errorMsg = handleRequestError(error);
+            core.setFailed(errorMsg);
         }
         else {
             core.setFailed('Error creating pull request: Unknown error');
@@ -111,10 +112,10 @@ exports.assigneUsersToPR = assigneUsersToPR;
 const addReviewersToPR = async (inputs, octokit, pr_number) => {
     try {
         if (inputs.user_reviewers) {
-            core.info(`Request the following user as reviewers: ${inputs.user_reviewers} `);
+            core.info(`Request the following user as reviewers: ${inputs.user_reviewers}`);
         }
         if (inputs.team_reviewers) {
-            core.info(`Request the following teams as reviewers: ${inputs.team_reviewers} `);
+            core.info(`Request the following teams as reviewers: ${inputs.team_reviewers}`);
         }
         const response = await octokit.rest.pulls.requestReviewers({
             repo: inputs.repo,
@@ -127,10 +128,11 @@ const addReviewersToPR = async (inputs, octokit, pr_number) => {
     }
     catch (error) {
         if (error instanceof Error) {
-            core.setFailed(`\nAction failed: ${error.message}`);
+            const errorMsg = handleRequestError(error);
+            core.setFailed(errorMsg);
         }
         else {
-            core.setFailed('Action failed: Unknown error');
+            core.info('Error adding the the reviewers: Unknown error');
         }
     }
 };
@@ -150,7 +152,7 @@ const handleRequestError = (error) => {
     else {
         errorMsg += "No response data available.";
     }
-    core.setFailed(errorMsg);
+    return errorMsg;
 };
 
 
