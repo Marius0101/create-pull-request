@@ -6,14 +6,14 @@ inputs:
   gh-token:
     description: "The github token with permisions."
     required: true
-  title: 
+  title:
     description: "The pull request title."
     required: true
   head:
     description: "The name of the branch where your changes are implemented."
     required: true
   base:
-    description: "The name of the branch you want the changes pulled into."  
+    description: "The name of the branch you want the changes pulled into."
     required: true
   body:
     description: "The contents of the pull request."
@@ -31,6 +31,6 @@ inputs:
     description: "A list with teams that will be requested for review."
     required: false
     default: ""
-runs: 
+runs:
   using: node20
   main: dist/index.js

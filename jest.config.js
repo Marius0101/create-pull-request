@@ -2,11 +2,14 @@
 module.exports = {
   testEnvironment: "node",
   transform: {
-    "^.+\.tsx?$": ["ts-jest",{}],
+    "^.+\.tsx?$": ["ts-jest", {}],
   },
   testMatch: ["**/?(*.)+(spec|test).ts?(x)"],
   reporters: [
     "default",
-    ["jest-junit", { outputDirectory: "./test-results", outputName: "jest-results.xml" }]
-  ]
+    [
+      "jest-junit",
+      { outputDirectory: "./test-results", outputName: "jest-results.xml" },
+    ],
+  ],
 };
