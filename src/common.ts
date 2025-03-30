@@ -1,8 +1,9 @@
 import * as core from '@actions/core';
 import {GitHub} from '@actions/github/lib/utils'
 import * as github from '@actions/github'
+import { RequestError } from '@octokit/request-error';
 
-async function getInputs(): Promise<Inputs> {
+const getInputs =  async (): Promise<Inputs> => {
     const getInputList = (inputName: string): string[] | undefined => {
         const input = core.getInput(inputName);
         if (input) {
@@ -31,7 +32,7 @@ async function getInputs(): Promise<Inputs> {
     return inputs  
 }
 
-async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitHub>): Promise<number> {
+const createPullRequest = async (inputs:Inputs, octokit:InstanceType<typeof GitHub>): Promise<number> => {
     core.info("Creating the pull request")
     try{
         const response = await octokit.rest.pulls.create({
@@ -48,18 +49,19 @@ async function createPullRequest(inputs:Inputs, octokit:InstanceType<typeof GitH
         }
     catch(error){
         if (error instanceof Error) {
-            core.setFailed(`\nAction failed: ${error.message}`);
+            const errorMsg = handleRequestError(error);
+            core.setFailed(errorMsg);
         } 
         else {
-            core.setFailed('Action failed: Unknown error');
+            core.setFailed('Error creating pull request: Unknown error');
         }
-        return 0
+        process.exit(1);
     }
 }
-async function assigneUsersToPR(
+const assigneUsersToPR = async (
     inputs: Inputs,
     octokit: InstanceType<typeof GitHub>,
-    pr_number: number): Promise<void>{
+    pr_number: number): Promise<void> =>{
     
     core.info(`Assign the following user to the PR: ${inputs.assignees} `)
     await octokit.rest.issues.addAssignees({
@@ -70,17 +72,17 @@ async function assigneUsersToPR(
     })
     core.info(`The users were assigned successfully.`);
 }
-async function addReviewersToPR(
+const addReviewersToPR = async(
     inputs: Inputs,
     octokit: InstanceType<typeof GitHub>,
-    pr_number: number): Promise<void>{
+    pr_number: number): Promise<void> => {
 
     try{
         if(inputs.user_reviewers){
-            core.info(`Request the following user as reviewers: ${inputs.user_reviewers} `)
+            core.info(`Request the following user as reviewers: ${inputs.user_reviewers}`)
         }
         if(inputs.team_reviewers){
-            core.info(`Request the following teams as reviewers: ${inputs.team_reviewers} `)
+            core.info(`Request the following teams as reviewers: ${inputs.team_reviewers}`)
         }
         const response = await octokit.rest.pulls.requestReviewers({
             repo: inputs.repo,
@@ -92,11 +94,32 @@ async function addReviewersToPR(
         core.info(`The reviewers were requested successfully.`);
     }catch(error){
         if (error instanceof Error) {
-            core.setFailed(`\nAction failed: ${error.message}`);
+            const errorMsg = handleRequestError(error);
+            core.setFailed(errorMsg);
         } 
         else {
-            core.setFailed('Action failed: Unknown error');
+            core.info('Error adding the the reviewers: Unknown error');
         }
     }
 }
-export{ getInputs, createPullRequest, assigneUsersToPR, addReviewersToPR}
+
+const handleRequestError = (error: Error): string => {
+    const requestErr = error as RequestError;
+    const data: ErrorDataResponse | undefined = requestErr.response?.data as ErrorDataResponse;
+    
+    let errorMsg = "Error creating pull request: ";
+    if (data) {
+        errorMsg += `${data.message}\n`;
+        errorMsg += `Status Code: ${data.status}\n`;
+        
+        if (data.errors?.length) {
+            errorMsg += "Details: " + data.errors.map(e => e.message).join("\n") + "\n";
+        }
+        
+        errorMsg += `GitHub endpoint documentation: ${data.documentation_url}\n`;
+    } else {
+        errorMsg += "No response data available.";
+    }
+    return errorMsg;
+};
+export { getInputs, createPullRequest, assigneUsersToPR, addReviewersToPR}
