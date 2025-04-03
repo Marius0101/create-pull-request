@@ -1,5 +1,5 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
-export default{
+export default {
   testEnvironment: "node",
   transform: {
     "^.+\\.tsx?$": ["ts-jest", {}],
