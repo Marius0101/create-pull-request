@@ -82,3 +82,5 @@ with:
     team2
     team3
 ```
+### Output Parameter
+This action will not return any output.
