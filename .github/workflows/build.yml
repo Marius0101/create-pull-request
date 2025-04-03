@@ -6,7 +6,7 @@ on:
       - develop
   workflow_dispatch:
 jobs:
-  test:
+  Build_development:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
