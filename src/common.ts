@@ -88,7 +88,7 @@ const addReviewersToPR = async (
         `Request the following teams as reviewers: ${inputs.team_reviewers}`,
       );
     }
-    const response = await octokit.rest.pulls.requestReviewers({
+    await octokit.rest.pulls.requestReviewers({
       repo: inputs.repo,
       owner: inputs.owner,
       pull_number: pr_number,

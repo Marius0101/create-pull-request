@@ -169,7 +169,7 @@ describe("createPullRequest tests", () => {
 
   it("Should handle know error", async () => {
     //Arrange
-    let data: ErrorDataResponse = {
+    const data: ErrorDataResponse = {
       message: "Validation Failed",
       status: "422",
       documentation_url:
@@ -183,7 +183,7 @@ describe("createPullRequest tests", () => {
         },
       ],
     };
-    let requestErr: RequestError = {
+    const requestErr: RequestError = {
       message: "",
       name: "HttpError",
       status: 422,
@@ -249,7 +249,7 @@ describe("assigneUsersToPR tests ", () => {
     assignees: ["user1", "user2"],
   };
   const pr_number = 123;
-  let mockOctokit = {
+  const mockOctokit = {
     rest: {
       issues: {
         addAssignees: jest.fn(),
@@ -261,7 +261,7 @@ describe("assigneUsersToPR tests ", () => {
   });
   it("Should call addAssignees with correct parameters", async () => {
     //Arrange
-    let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
+    const octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
 
     //Act
     await assigneUsersToPR(inputs, octokit, pr_number);
@@ -305,7 +305,7 @@ describe("addReviewersToPR tests", () => {
     },
   };
   let coreinfoMock: jest.SpyInstance<void, [message: string], any>;
-  let inputs: Inputs = {
+  const inputs: Inputs = {
     repo: "testRepo",
     owner: "testOwner",
     ghToken: "testToken",
@@ -331,7 +331,7 @@ describe("addReviewersToPR tests", () => {
     //Arrange
     inputs.user_reviewers = ["user1", "user2"];
     inputs.team_reviewers = ["team1", "team2"];
-    let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
+    const octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
 
     await addReviewersToPR(inputs, octokit, pr_number);
     expect(octokit.rest.pulls.requestReviewers).toHaveBeenCalledWith({
@@ -358,7 +358,7 @@ describe("addReviewersToPR tests", () => {
   it("Should request user reviewers with success", async () => {
     //Arrange
     inputs.user_reviewers = ["user1", "user2"];
-    let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
+    const octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
 
     await addReviewersToPR(inputs, octokit, pr_number);
     expect(octokit.rest.pulls.requestReviewers).toHaveBeenCalledWith({
@@ -380,7 +380,7 @@ describe("addReviewersToPR tests", () => {
   it("Should request team reviewers with success", async () => {
     //Arrange
     inputs.team_reviewers = ["team1", "team2"];
-    let octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
+    const octokit = mockOctokit as unknown as InstanceType<typeof GitHub>;
 
     await addReviewersToPR(inputs, octokit, pr_number);
     expect(octokit.rest.pulls.requestReviewers).toHaveBeenCalledWith({
