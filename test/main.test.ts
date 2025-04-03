@@ -5,12 +5,12 @@ import { run } from "../src/main";
 import { jest, describe, expect } from "@jest/globals";
 
 describe("main run function", () => {
-  let mockGetInputs = jest.spyOn(common, "getInputs");
-  let mockCreatePullRequest = jest.spyOn(common, "createPullRequest");
-  let mockAssigneUsersToPR = jest.spyOn(common, "assigneUsersToPR");
-  let mockAddReviewersToPR = jest.spyOn(common, "addReviewersToPR");
-  let mockCoreInfo = jest.spyOn(core, "info");
-  let octokitMock = { rest: { pulls: { create: jest.fn() } } };
+  const mockGetInputs = jest.spyOn(common, "getInputs");
+  const mockCreatePullRequest = jest.spyOn(common, "createPullRequest");
+  const mockAssigneUsersToPR = jest.spyOn(common, "assigneUsersToPR");
+  const mockAddReviewersToPR = jest.spyOn(common, "addReviewersToPR");
+  jest.spyOn(core, "info");
+  const octokitMock = { rest: { pulls: { create: jest.fn() } } };
   let inputs: Inputs;
 
   beforeEach(() => {
