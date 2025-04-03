@@ -5,6 +5,12 @@ export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   {
-    ignores: ['node_modules/', 'dist/','lib/']
+    ignores: ['node_modules/', 'dist/','lib/'],
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': ['warn', { fixToUnknown: false, ignoreRestArgs: true }],
+    }
   }
 );
