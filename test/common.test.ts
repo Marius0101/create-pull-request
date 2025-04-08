@@ -32,7 +32,7 @@ describe("getInputs tests", () => {
   it("Should return corect inputs when all inputs are provided", async () => {
     //Arrange
     inputs = {
-      "gh-token": "testToken",
+      "token": "testToken",
       title: "testTitle",
       head: "testHead",
       base: "testBase",
@@ -63,7 +63,7 @@ describe("getInputs tests", () => {
   it("Should return empty arrays when assignees,user_reviewers and team_reviewers are empty", async () => {
     //Arrange
     inputs = {
-      "gh-token": "testToken",
+      "token": "testToken",
       title: "testTitle",
       head: "testHead",
       base: "testBase",
@@ -91,7 +91,7 @@ describe("getInputs tests", () => {
   it("Should handle whitespaces correctly", async () => {
     //Arrange
     inputs = {
-      "gh-token": "testToken",
+      "token": "testToken",
       title: "testTitle",
       head: "testHead",
       base: "testBase",

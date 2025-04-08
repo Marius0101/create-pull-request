@@ -11,7 +11,7 @@ See [action.yml](https://github.com/Marius0101/create-pull-request/blob/develop/
 - uses:  Marius0101/create-pull-request@develop
   with:
     #The Github acces token
-    gh-token: ''
+    token: ''
 
     #The title of the pull request.
     title: '' 
@@ -26,7 +26,7 @@ See [action.yml](https://github.com/Marius0101/create-pull-request/blob/develop/
 ```yaml
     uses:  Marius0101/create-pull-request@develop
     with:
-        gh-token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         title: 'Add new feature' 
         head: 'feature/new-feature' 
         base: 'develop' 
