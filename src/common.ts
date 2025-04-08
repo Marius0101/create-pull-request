@@ -15,7 +15,7 @@ const getInputs = async (): Promise<Inputs> => {
   const inputs: Inputs = {
     repo: github.context.repo.repo,
     owner: github.context.repo.owner,
-    ghToken: core.getInput("gh-token"),
+    ghToken: core.getInput("token"),
     title: core.getInput("title"),
     head: core.getInput("head"),
     base: core.getInput("base"),

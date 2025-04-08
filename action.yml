@@ -3,7 +3,7 @@ description: "Create pull request"
 author: "Marius Mihalcea"
 
 inputs:
-  gh-token:
+  token:
     description: "The github token with permisions."
     required: true
   title:
