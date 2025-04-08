@@ -10,6 +10,7 @@ describe("main run function", () => {
   const mockAssigneUsersToPR = jest.spyOn(common, "assigneUsersToPR");
   const mockAddReviewersToPR = jest.spyOn(common, "addReviewersToPR");
   jest.spyOn(core, "info");
+  jest.spyOn(core, "setOutput");
   const octokitMock = { rest: { pulls: { create: jest.fn() } } };
   let inputs: Inputs;
 
@@ -31,6 +32,7 @@ describe("main run function", () => {
   it("Should create pull request when inputs does not contain any assignees or reviewers", async () => {
     //Arrange
     mockGetInputs.mockResolvedValue(inputs);
+    mockCreatePullRequest.mockResolvedValue(2);
 
     //Act
     await run();
@@ -47,6 +49,7 @@ describe("main run function", () => {
       2,
       "No reviewers added to this pull request!",
     );
+    expect(core.setOutput).toBeCalledWith("pr_number",2)
   });
 
   it("Should assign users when assignees are added", async () => {
