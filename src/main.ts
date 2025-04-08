@@ -7,7 +7,7 @@ import {
   addReviewersToPR,
 } from "./common";
 
-export async function run(): Promise<void> {
+const run = async (): Promise<void> =>{
   const inputs = await getInputs();
   const octokit = github.getOctokit(inputs.ghToken);
 
@@ -25,3 +25,4 @@ export async function run(): Promise<void> {
   }
   core.info("do somthing");
 }
+export default run;

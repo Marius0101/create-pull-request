@@ -1,7 +1,7 @@
 import * as common from "../src/common";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
-import { run } from "../src/main";
+import run from "../src/main";
 import { jest, describe, expect } from "@jest/globals";
 
 describe("main run function", () => {
