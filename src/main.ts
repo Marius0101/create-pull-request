@@ -7,12 +7,12 @@ import {
   addReviewersToPR,
 } from "./common";
 
-export async function run(): Promise<void> {
+const run = async (): Promise<void> =>{
   const inputs = await getInputs();
   const octokit = github.getOctokit(inputs.ghToken);
 
   const pr_number: number = await createPullRequest(inputs, octokit);
-
+  core.setOutput("pr_number", pr_number);
   if (inputs.assignees) {
     await assigneUsersToPR(inputs, octokit, pr_number);
   } else {
@@ -25,3 +25,4 @@ export async function run(): Promise<void> {
   }
   core.info("do somthing");
 }
+export default run;
