@@ -31,6 +31,9 @@ inputs:
     description: "A list with teams that will be requested for review."
     required: false
     default: ""
+outputs: 
+  pr_number:
+    description: The pull request number
 runs:
   using: node20
   main: dist/index.js
