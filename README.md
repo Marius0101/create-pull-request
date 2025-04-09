@@ -1,28 +1,26 @@
-# create-pull-request
+# :rocket: create-pull-request
 
-This action provide the following functionality for GitHub Actions:
-- Create a pull request
-- Optionally:
-  - Assign user to the pull request you just created
-  - Request review from user or teams 
-## Usage
-See [action.yml](https://github.com/Marius0101/create-pull-request/blob/develop/action.yml)
+A simple GitHub Action to automate the creation of pull requests. \
+It also supports assigning users and requesting reviews from individuals or teams.
+
+## :sparkles: Features
+- :white_check_mark: Create a pull request
+- :bust_in_silhouette: Assign users
+- :eyes: Request reviews from users or teams 
+
+## :package: Usage
+See the [action.yml](https://github.com/Marius0101/create-pull-request/blob/develop/action.yml) file for detailed input options.
+
+### :white_check_mark: Basic Setup
 ```yaml
 - uses:  Marius0101/create-pull-request@develop
   with:
-    #The Github acces token
-    token: ''
-
-    #The title of the pull request.
-    title: '' 
-
-    #The name of the branch where your changes are implemented.
-    head: '' 
-
-    #The name of the branch you want the changes pulled into.
-    base: '' 
+    token: ''       # GitHub access token
+    title: ''       # Title of the pull request
+    head: ''        # Source branch (e.g. 'feature/new-feature')
+    base: ''        # Target branch (e.g. 'main' or 'develop')
 ```
-### Basic Example
+### :test_tube: Example
 ```yaml
     uses:  Marius0101/create-pull-request@develop
     with:
@@ -31,19 +29,22 @@ See [action.yml](https://github.com/Marius0101/create-pull-request/blob/develop/
         head: 'feature/new-feature' 
         base: 'develop' 
 ```
-### Optional Parameters
+### :gear: Optional Parameters
 
 #### `body`
-Add a description to the pull request. You can also add markdown in text.
+Description for the pull request. Supports Markdown.
 
 ```yaml
 with:
-    body: This is a body description
+    body: |
+        This is a body description.
+        - It supports **Markdown**
 ```
 
 #### `assignees`
-Assign a user to the pull request you want to create.\
-:warning: You can add up to 10 user to the pull request.
+Assign users to the pull request.
+- You can specify up to 10 users.
+- Accepts space-separated or multiline format.
 ```yaml
 with:
     assignees: user1 user2 user3
@@ -56,7 +57,8 @@ with:
     user3
 ```
 #### `user_reviewers`
-Request a user to review the pull request you want to create. If a user doesn't have permisions to the repository the actions will not fail.
+Request reviews from individual users.\
+:warning: If a user does not have access to the repository, the action will not fail.
 ```yaml
 with:
     user_reviewers: user1 user2 user3
@@ -70,7 +72,8 @@ with:
 ```
 
 #### `team_reviewers`
-Request a team to review the pull request you want to create. If a team doesn't have permisions to the repository the actions will not be fail.
+Request reviews from GitHub teams. \
+:warning: If a team does not have access to the repository, the action will not fail.
 ```yaml
 with:
     team_reviewers: team1 team2 team3
@@ -82,5 +85,18 @@ with:
     team2
     team3
 ```
-### Output Parameter
-This action will not return any output.
+### :outbox_tray: Output Parameter
+#### `pr_number`
+Returns the number of the pull request created.
+```yaml
+    #Example usage
+    - uses:  Marius0101/create-pull-request@develop
+      id: create-pull-request
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        title: 'Add new feature' 
+        head: 'feature/new-feature' 
+        base: 'develop' 
+    - run: |
+        echo "Pull request number: ${{ steps.create-pull-request.outputs.pr_number }}""
+```
