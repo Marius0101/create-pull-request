@@ -1,4 +1,4 @@
-name: "Create pull request"
+name: "quick-pull-request"
 description: "Create pull request"
 author: "Marius Mihalcea"
 icon: "git-pull-request"
