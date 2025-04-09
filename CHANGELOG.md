@@ -1,4 +1,17 @@
 # :package: Changelog
+
+v1.1.0 - New Features and Bug Fixes
+ N/A
+
+### :hammer_and_wrench: Fixed
+- N/A
+
+### :sparkles: Features
+- N/A
+
+### :wrench: Maintenance
+- N/A
+
 ## v1.0.0 - Initial Release
 :tada: First release of create-pull-request GitHub Action!\
 This action automates the process of creating pull requests and offers customization through multiple input parameters.
