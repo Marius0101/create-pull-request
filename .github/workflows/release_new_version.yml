@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 jobs:
     Build:
-        uses: .github/workflows/build_develop.yml
+        uses: ./.github/workflows/build_develop.yml
     CreateNewTag:
         needs: Build
         runs-on: ubuntu-latest
