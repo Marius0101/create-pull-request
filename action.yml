@@ -1,8 +1,9 @@
 name: "quick-pull-request"
 description: "Create pull request"
 author: "Marius Mihalcea"
-icon: git-pull-request
-color: yellow
+branding:
+  icon: 'git-pull-request'
+  color: 'yellow'
 
 inputs:
   token:
